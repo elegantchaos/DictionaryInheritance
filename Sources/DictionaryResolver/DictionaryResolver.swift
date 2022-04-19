@@ -9,7 +9,7 @@ import Foundation
 public struct DictionaryResolver {
     public typealias Record = [String:Any]
     public typealias Index = [String: Record]
-    public typealias Combiner = (Any, Any) -> Any
+    public typealias Combiner = (String, inout Record, Record) -> Bool
 
     let inheritanceKey: String
     let resolvingKey: String
@@ -22,19 +22,15 @@ public struct DictionaryResolver {
     var resolved: Index
     
     /// Custom combining functions, stored by key.
-    var combineByKey: [String: Combiner]
+    var customCombiners: [Combiner]
     
-    /// Custom combining functions, stored by record type.
-    var combineByType: [String: Combiner]
-
     var merger: (inout Record, Record) -> ()
 
     /// Create with an existing set of records.
     public init(_ records: Index = [:], inheritanceKey: String = "inherits", resolvingKey: String = "«resolving»") {
         self.records = records
         self.resolved = [:]
-        self.combineByKey = [:]
-        self.combineByType = [:]
+        self.customCombiners = []
         self.inheritanceKey = inheritanceKey
         self.resolvingKey = resolvingKey
         self.merger = Self.simpleMerge
@@ -48,6 +44,11 @@ public struct DictionaryResolver {
     /// Add some records to the index.
     public mutating func add(_ newRecords: Index) {
         records.mergeReplacingDuplicates(newRecords)
+    }
+    
+    /// Register a custom function to combine values.
+    public mutating func addCombiner(_ combiner: @escaping Combiner) {
+        customCombiners.append(combiner)
     }
     
     /// Add a record to the index from a file.
@@ -68,8 +69,7 @@ public struct DictionaryResolver {
     
     /// Resolve all unresolved records.
     public mutating func resolve() {
-        let useCustomMerger = (combineByKey.count > 0) || (combineByType.count > 0)
-        merger = useCustomMerger ? customMerge : Self.simpleMerge
+        merger = customCombiners.isEmpty ? Self.simpleMerge : customMerge
         
         // for valid sets of records the order we merge in makes no difference, but if there
         // are loops, then the order determines which merge succeeds and which one fails
@@ -97,18 +97,14 @@ public struct DictionaryResolver {
         resolved.removeAll()
     }
 
-    public static func stringListMerge(_ existing: Any, _ inherited: Any) -> Any {
-        if let existingList = existing as? [String], let inheritedList = inherited as? [String] {
-            return inheritedList + existingList
-        } else {
-            return existing
+    public static func stringListMerge(_ key: String, _ existing: inout Record, _ inherited: Record) -> Bool {
+        guard let existingList = existing[key] as? [String], let inheritedList = inherited[key] as? [String] else {
+            return false
         }
+        
+        existing[key] = inheritedList + existingList
+        return true
     }
-
-    public static func stringListMerge2(_ existingList: [String], _ inheritedList: [String]) -> [String] {
-        return inheritedList + existingList
-    }
-
 }
 
 private extension DictionaryResolver {
@@ -157,28 +153,22 @@ private extension DictionaryResolver {
     static func simpleMerge(_ record: inout Record, with newRecord: Record) {
         record.merge(newRecord, uniquingKeysWith: { existing, new in existing })
     }
-    
-    func customMerge(_ record: inout Record, with newRecord: Record) {
-        for key in record.keys {
-            if let existing = record[key] {
-                if let new = newRecord[key] {
-                    if let combiner = combineByKey[key] {
-                        record[key] = combiner(existing, new)
-                    } else {
-                        let t = type(of: existing)
-                        if t == type(of: new), let combiner = combineByType[String(describing: t)] {
-                            record[key] = combiner(existing, new)
-                        }
-                    }
-                }
-            } else if let new = newRecord[key] {
-                record[key] = new
+
+    func customMerge(_ record: inout Record, with newRecord: Record, key: String) {
+        for combiner in customCombiners {
+            if combiner(key, &record, newRecord) {
+                return
             }
         }
+        
+        if record[key] == nil {
+            record[key] = newRecord[key]
+        }
     }
-    
-    func combinerForKey(_ key: String) -> (Any, Any) -> Any {
-        return combineByKey[key] ?? { existing, new in
+
+    func customMerge(_ record: inout Record, with newRecord: Record) {
+        for key in record.keys {
+            customMerge(&record, with: newRecord, key: key)
         }
     }
 }

@@ -64,19 +64,27 @@ final class DictionaryResolverTests: XCTestCase {
     func testMergingListsByKey() throws {
         var index = try testResolver(named: "ListMergeTest", resolve: false)
         
-        index.combineByKey["merged"] = DictionaryResolver.stringListMerge
-//        { existing, new in
-//            if let existingList = existing as? [String], let inheritedList = new as? [String] {
-//                return existingList + inheritedList
-//            } else {
-//                return existing
-//            }
-//        }
+        index.addCombiner { key, existing, inherited in
+            guard key == "merged" else { return false }
+            return DictionaryResolver.stringListMerge(key, &existing, inherited)
+        }
+        
         index.resolve()
         
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
         XCTAssertEqual(r2["unmerged"] as? [String], ["bar"])
+    }
+
+    func testMergingListsByType() throws {
+        var index = try testResolver(named: "ListMergeTest", resolve: false)
+        
+        index.addCombiner(DictionaryResolver.stringListMerge)
+        index.resolve()
+        
+        let r2 = index.record(withID: "r2")!
+        XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
+        XCTAssertEqual(r2["unmerged"] as? [String], ["foo", "bar"])
     }
 
 }
