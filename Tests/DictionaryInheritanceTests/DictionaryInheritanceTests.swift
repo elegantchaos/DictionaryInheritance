@@ -13,7 +13,7 @@ final class DictionaryInheritanceTests: XCTestCase {
         let example = try testDictionary(named: "InheritanceTest")
         print(example)
         
-        let index = DictionaryIndex(example as! DictionaryIndex.Index)
+        var index = DictionaryIndex(example as! DictionaryIndex.Index)
         index.resolve()
         
         let r2 = index.record(withID: "r2")!
