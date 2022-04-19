@@ -9,11 +9,14 @@ import XCTestExtensions
 @testable import DictionaryResolver
 
 final class DictionaryResolverTests: XCTestCase {
-    func testResolver(named name: String) throws -> DictionaryResolver {
+    func testResolver(named name: String, resolve: Bool = true) throws -> DictionaryResolver {
         let url = testURL(named: name, withExtension: "json")
         var resolver = DictionaryResolver()
         try resolver.loadRecords(from: url)
-        resolver.resolve()
+        if resolve {
+            resolver.resolve()
+        }
+        
         return resolver
     }
     
@@ -35,7 +38,7 @@ final class DictionaryResolverTests: XCTestCase {
     }
 
     func testMultipleInheritance() throws {
-        let index = try testResolver(named: "MutlipleTest")
+        let index = try testResolver(named: "MultipleTest")
 
         let r3 = index.record(withID: "r3")!
         XCTAssertEqual(r3["foo"] as? String, "bar")
@@ -46,9 +49,9 @@ final class DictionaryResolverTests: XCTestCase {
     func testLoop() throws {
         let index = try testResolver(named: "LoopTest")
 
-        let r2 = index.record(withID: "r2")!
-        XCTAssertEqual(r2["foo"] as? String, "bar")
-        XCTAssertEqual(r2["bar"] as? String, "foo")
+        let r1 = index.record(withID: "r1")!
+        XCTAssertEqual(r1["foo"] as? String, "bar")
+        XCTAssertEqual(r1["bar"] as? String, "foo")
     }
 
     func testInheritorOverwritesInherited() throws {
@@ -57,6 +60,25 @@ final class DictionaryResolverTests: XCTestCase {
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["foo"] as? String, "bar")
     }
+
+    func testMergingListsByKey() throws {
+        var index = try testResolver(named: "ListMergeTest", resolve: false)
+        
+        index.combineByKey["merged"] = DictionaryResolver.stringListMerge
+//        { existing, new in
+//            if let existingList = existing as? [String], let inheritedList = new as? [String] {
+//                return existingList + inheritedList
+//            } else {
+//                return existing
+//            }
+//        }
+        index.resolve()
+        
+        let r2 = index.record(withID: "r2")!
+        XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
+        XCTAssertEqual(r2["unmerged"] as? [String], ["bar"])
+    }
+
 }
 
 extension XCTestCase {
