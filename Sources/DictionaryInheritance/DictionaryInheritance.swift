@@ -7,6 +7,13 @@ public struct DictionaryIndex {
     public typealias Record = [String:Any]
     public typealias Index = [String: Record]
 
+    class ResolvingSentinel {
+    }
+    
+    let inheritanceKey = "inherits"
+    let resolvingKey = "«resolving»"
+    let resolvingSentinel = ResolvingSentinel()
+    
     var records: Index
     
     init(_ records: Index) {
@@ -23,15 +30,22 @@ public struct DictionaryIndex {
     
     func resolve(key: String, into resolved: inout Index) -> Record? {
         if let resolved = resolved[key] {
+            if (resolved.count == 1) && (resolved[resolvingKey] as? ResolvingSentinel === resolvingSentinel) {
+                print("loop detected for record \(key)")
+                return [:]
+            }
+
             return resolved
         }
         
         guard let raw = records[key] else { return nil }
-        guard let inherits = raw["inherits"] as? [String] else {
+        guard let inherits = raw[inheritanceKey] as? [String] else {
             resolved[key] = raw
             return raw
         }
         
+        resolved[key] = [resolvingKey:resolvingSentinel] // guard against recursion
+
         var merged = raw
         for inheritedKey in inherits {
             if let inhertedValues = resolve(key: inheritedKey, into: &resolved) {

@@ -4,7 +4,11 @@
     },
     
     "r2": {
-        "inherits": ["r1"],
         "bar": "foo"
+    },
+    
+    "r3": {
+        "inherits": ["r1", "r2"],
+        "wibble": "wobble"
     }
 }

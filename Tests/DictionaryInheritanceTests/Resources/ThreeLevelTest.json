@@ -6,5 +6,10 @@
     "r2": {
         "inherits": ["r1"],
         "bar": "foo"
+    },
+    
+    "r3": {
+        "inherits": ["r2"],
+        "wibble": "wobble"
     }
 }

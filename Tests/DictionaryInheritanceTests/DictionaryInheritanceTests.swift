@@ -10,8 +10,7 @@ import XCTestExtensions
 
 final class DictionaryInheritanceTests: XCTestCase {
     func testSingleInheritance() throws {
-        let example = try testDictionary(named: "InheritanceTest")
-        print(example)
+        let example = try testDictionary(named: "SimpleTest")
         
         var index = DictionaryIndex(example as! DictionaryIndex.Index)
         index.resolve()
@@ -20,6 +19,42 @@ final class DictionaryInheritanceTests: XCTestCase {
         XCTAssertEqual(r2["foo"] as? String, "bar")
         XCTAssertEqual(r2["bar"] as? String, "foo")
     }
+
+    func testThreeLevelInheritance() throws {
+        let example = try testDictionary(named: "ThreeLevelTest")
+        
+        var index = DictionaryIndex(example as! DictionaryIndex.Index)
+        index.resolve()
+        
+        let r3 = index.record(withID: "r3")!
+        XCTAssertEqual(r3["foo"] as? String, "bar")
+        XCTAssertEqual(r3["bar"] as? String, "foo")
+        XCTAssertEqual(r3["wibble"] as? String, "wobble")
+    }
+
+    func testMultipleInheritance() throws {
+        let example = try testDictionary(named: "MultipleTest")
+        
+        var index = DictionaryIndex(example as! DictionaryIndex.Index)
+        index.resolve()
+        
+        let r3 = index.record(withID: "r3")!
+        XCTAssertEqual(r3["foo"] as? String, "bar")
+        XCTAssertEqual(r3["bar"] as? String, "foo")
+        XCTAssertEqual(r3["wibble"] as? String, "wobble")
+    }
+
+    func testLoop() throws {
+        let example = try testDictionary(named: "LoopTest")
+        
+        var index = DictionaryIndex(example as! DictionaryIndex.Index)
+        index.resolve()
+        
+        let r2 = index.record(withID: "r2")!
+        XCTAssertEqual(r2["foo"] as? String, "bar")
+        XCTAssertEqual(r2["bar"] as? String, "foo")
+    }
+
 }
 
 extension XCTestCase {
