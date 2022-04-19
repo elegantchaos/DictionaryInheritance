@@ -50,7 +50,15 @@ public struct DictionaryResolver {
     public mutating func addCombiner(_ combiner: @escaping Combiner) {
         customCombiners.append(combiner)
     }
-    
+
+    /// Register a custom function to combine values which is only applied to certain keys.
+    public mutating func addCombinerForKeys(_ keys: Set<String>, _ combiner: @escaping Combiner) {
+        addCombiner { key, existing, inherited in
+            guard keys.contains(key) else { return false }
+            return DictionaryResolver.stringListMerge(key, &existing, inherited)
+        }
+    }
+
     /// Add a record to the index from a file.
     public mutating func loadRecord(from url: URL) throws {
         let data = try Data(contentsOf: url)

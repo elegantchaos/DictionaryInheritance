@@ -63,12 +63,7 @@ final class DictionaryResolverTests: XCTestCase {
 
     func testMergingListsByKey() throws {
         var index = try testResolver(named: "ListMergeTest", resolve: false)
-        
-        index.addCombiner { key, existing, inherited in
-            guard key == "merged" else { return false }
-            return DictionaryResolver.stringListMerge(key, &existing, inherited)
-        }
-        
+        index.addCombinerForKeys(["merged"], DictionaryResolver.stringListMerge)
         index.resolve()
         
         let r2 = index.record(withID: "r2")!
@@ -78,7 +73,6 @@ final class DictionaryResolverTests: XCTestCase {
 
     func testMergingListsByType() throws {
         var index = try testResolver(named: "ListMergeTest", resolve: false)
-        
         index.addCombiner(DictionaryResolver.stringListMerge)
         index.resolve()
         
