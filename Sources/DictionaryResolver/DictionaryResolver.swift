@@ -55,7 +55,7 @@ public struct DictionaryResolver {
     public mutating func addCombinerForKeys(_ keys: Set<String>, _ combiner: @escaping Combiner) {
         addCombiner { key, existing, inherited in
             guard keys.contains(key) else { return false }
-            return DictionaryResolver.stringListMerge(key, &existing, inherited)
+            return combiner(key, &existing, inherited)
         }
     }
 
@@ -77,6 +77,7 @@ public struct DictionaryResolver {
     
     /// Resolve all unresolved records.
     public mutating func resolve() {
+        // use a simple merge function if we can, as it's faster
         merger = customCombiners.isEmpty ? Self.simpleMerge : customMerge
         
         // for valid sets of records the order we merge in makes no difference, but if there
@@ -105,7 +106,9 @@ public struct DictionaryResolver {
         resolved.removeAll()
     }
 
-    public static func stringListMerge(_ key: String, _ existing: inout Record, _ inherited: Record) -> Bool {
+    /// Standard combiner which merges two lists of strings together.
+    /// It only runs if both the current and inherited values for the key are of type `Array<String>`.
+    public static func combineStringLists(_ key: String, _ existing: inout Record, _ inherited: Record) -> Bool {
         guard let existingList = existing[key] as? [String], let inheritedList = inherited[key] as? [String] else {
             return false
         }
@@ -157,26 +160,36 @@ private extension DictionaryResolver {
         resolved[key] = merged
         return merged
     }
-    
-    static func simpleMerge(_ record: inout Record, with newRecord: Record) {
-        record.merge(newRecord, uniquingKeysWith: { existing, new in existing })
+
+    /// Merge in any keys from an inherited record.
+    /// If the property already exists, we keep that value and ignore the inherited one.
+    static func simpleMerge(_ record: inout Record, with inheritedRecord: Record) {
+        record.merge(inheritedRecord, uniquingKeysWith: { existing, new in existing })
     }
 
-    func customMerge(_ record: inout Record, with newRecord: Record, key: String) {
+    /// Merge in any keys from an inherited record, using the custom combiners.
+    /// We sort the keys so that the combiners can predict the order in which properties
+    /// will be merged.
+    func customMerge(_ record: inout Record, with inheritedRecord: Record) {
+        let sortedKeys = record.keys.sorted()
+        for key in sortedKeys {
+            customMerge(&record, with: inheritedRecord, key: key)
+        }
+    }
+
+    /// Merge the specified key from an inherited record.
+    /// We try each custom combiner in turn until one says that it has succeeded.
+    /// If none succeed, and the property already exists, we keep that value and ignore the inherited one.
+    func customMerge(_ record: inout Record, with inheritedRecord: Record, key: String) {
         for combiner in customCombiners {
-            if combiner(key, &record, newRecord) {
+            if combiner(key, &record, inheritedRecord) {
                 return
             }
         }
         
         if record[key] == nil {
-            record[key] = newRecord[key]
+            record[key] = inheritedRecord[key]
         }
     }
 
-    func customMerge(_ record: inout Record, with newRecord: Record) {
-        for key in record.keys {
-            customMerge(&record, with: newRecord, key: key)
-        }
-    }
 }
