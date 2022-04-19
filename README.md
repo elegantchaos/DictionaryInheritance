@@ -1,8 +1,8 @@
-# DictionaryInheritance
+# DictionaryResolver
 
 This library implements a simple inheritance system for a collection of dictionaries.
 
-You can define raw dictionary records with any properties you like, and add them to the index, tagging each one with a unique identifier.
+You can define raw dictionary records with any properties you like, and add them to the resolver, tagging each one with a unique identifier.
 
 Once all records have been added to the index, you can resolve it.
 

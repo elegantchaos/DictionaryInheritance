@@ -8,24 +8,33 @@
 import PackageDescription
 
 let package = Package(
-    name: "DictionaryInheritance",
+    name: "DictionaryResolver",
     platforms: [
         .macOS(.v12), .iOS(.v15), .tvOS(.v15), .watchOS(.v8)
     ],
     products: [
         .library(
-            name: "DictionaryInheritance",
-            targets: ["DictionaryInheritance"]),
+            name: "DictionaryResolver",
+            targets: ["DictionaryResolver"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/elegantchaos/CollectionExtensions.git", from: "1.1.9"),
         .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.4.2")
     ],
     targets: [
         .target(
-            name: "DictionaryInheritance",
-            dependencies: []),
+            name: "DictionaryResolver",
+            dependencies: ["CollectionExtensions"]
+        ),
+        
         .testTarget(
-            name: "DictionaryInheritanceTests",
-            dependencies: ["DictionaryInheritance", "XCTestExtensions"]),
+            name: "DictionaryResolverTests",
+            
+            dependencies: ["DictionaryResolver", "XCTestExtensions"],
+            
+            resources: [
+                .copy("Resources")
+            ]
+        ),
     ]
 )

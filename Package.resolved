@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "CollectionExtensions",
+        "repositoryURL": "https://github.com/elegantchaos/CollectionExtensions.git",
+        "state": {
+          "branch": null,
+          "revision": "52b3547475730a2b6bafc17dc1df31ad2ca53200",
+          "version": "1.1.9"
+        }
+      },
+      {
         "package": "Matchable",
         "repositoryURL": "https://github.com/elegantchaos/Matchable.git",
         "state": {

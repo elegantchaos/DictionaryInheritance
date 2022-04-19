@@ -1,0 +1,11 @@
+{
+    "r1": {
+        "inherits": ["r2"],
+        "foo": "bar"
+    },
+    
+    "r2": {
+        "inherits": ["r1"],
+        "bar": "foo"
+    }
+}

@@ -6,26 +6,28 @@
 import XCTest
 import XCTestExtensions
 
-@testable import DictionaryInheritance
+@testable import DictionaryResolver
 
-final class DictionaryInheritanceTests: XCTestCase {
+final class DictionaryResolverTests: XCTestCase {
+    func testResolver(named name: String) throws -> DictionaryResolver {
+        let url = testURL(named: name, withExtension: "json")
+        var resolver = DictionaryResolver()
+        try resolver.loadRecords(from: url)
+        resolver.resolve()
+        return resolver
+    }
+    
     func testSingleInheritance() throws {
-        let example = try testDictionary(named: "SimpleTest")
-        
-        var index = DictionaryIndex(example as! DictionaryIndex.Index)
-        index.resolve()
-        
+        let index = try testResolver(named: "SimpleTest")
+
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["foo"] as? String, "bar")
         XCTAssertEqual(r2["bar"] as? String, "foo")
     }
 
     func testThreeLevelInheritance() throws {
-        let example = try testDictionary(named: "ThreeLevelTest")
-        
-        var index = DictionaryIndex(example as! DictionaryIndex.Index)
-        index.resolve()
-        
+        let index = try testResolver(named: "ThreeLevelTest")
+
         let r3 = index.record(withID: "r3")!
         XCTAssertEqual(r3["foo"] as? String, "bar")
         XCTAssertEqual(r3["bar"] as? String, "foo")
@@ -33,11 +35,8 @@ final class DictionaryInheritanceTests: XCTestCase {
     }
 
     func testMultipleInheritance() throws {
-        let example = try testDictionary(named: "MultipleTest")
-        
-        var index = DictionaryIndex(example as! DictionaryIndex.Index)
-        index.resolve()
-        
+        let index = try testResolver(named: "MutlipleTest")
+
         let r3 = index.record(withID: "r3")!
         XCTAssertEqual(r3["foo"] as? String, "bar")
         XCTAssertEqual(r3["bar"] as? String, "foo")
@@ -45,22 +44,20 @@ final class DictionaryInheritanceTests: XCTestCase {
     }
 
     func testLoop() throws {
-        let example = try testDictionary(named: "LoopTest")
-        
-        var index = DictionaryIndex(example as! DictionaryIndex.Index)
-        index.resolve()
-        
+        let index = try testResolver(named: "LoopTest")
+
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["foo"] as? String, "bar")
         XCTAssertEqual(r2["bar"] as? String, "foo")
     }
 
+    func testInheritorOverwritesInherited() throws {
+        let index = try testResolver(named: "OverwriteTest")
+        
+        let r2 = index.record(withID: "r2")!
+        XCTAssertEqual(r2["foo"] as? String, "bar")
+    }
 }
 
 extension XCTestCase {
-    func testDictionary(named name: String) throws -> [String:Any] {
-        let url = testURL(named: name, withExtension: "json")
-        let data = try Data(contentsOf: url)
-        return try JSONSerialization.jsonObject(with: data) as! [String:Any]
-    }
 }
