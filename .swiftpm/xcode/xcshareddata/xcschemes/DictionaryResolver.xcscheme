@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1150"
+   LastUpgradeVersion = "1330"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DictionaryInheritance"
-               BuildableName = "DictionaryInheritance"
-               BlueprintName = "DictionaryInheritance"
+               BlueprintIdentifier = "DictionaryResolver_DictionaryResolverTests"
+               BuildableName = "DictionaryResolver_DictionaryResolverTests"
+               BlueprintName = "DictionaryResolver_DictionaryResolverTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DictionaryResolver"
+               BuildableName = "DictionaryResolver"
+               BlueprintName = "DictionaryResolver"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +42,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DictionaryInheritanceTests"
-               BuildableName = "DictionaryInheritanceTests"
-               BlueprintName = "DictionaryInheritanceTests"
+               BlueprintIdentifier = "DictionaryResolverTests"
+               BuildableName = "DictionaryResolverTests"
+               BlueprintName = "DictionaryResolverTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +60,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DictionaryInheritanceTests"
-               BuildableName = "DictionaryInheritanceTests"
-               BlueprintName = "DictionaryInheritanceTests"
+               BlueprintIdentifier = "DictionaryResolverTests"
+               BuildableName = "DictionaryResolverTests"
+               BlueprintName = "DictionaryResolverTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -74,9 +88,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DictionaryInheritance"
-            BuildableName = "DictionaryInheritance"
-            BlueprintName = "DictionaryInheritance"
+            BlueprintIdentifier = "DictionaryResolver_DictionaryResolverTests"
+            BuildableName = "DictionaryResolver_DictionaryResolverTests"
+            BlueprintName = "DictionaryResolver_DictionaryResolverTests"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

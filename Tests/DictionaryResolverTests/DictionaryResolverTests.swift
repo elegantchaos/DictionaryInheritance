@@ -12,7 +12,7 @@ final class DictionaryResolverTests: XCTestCase {
     func testResolver(named name: String, resolve: Bool = true) throws -> DictionaryResolver {
         let url = testURL(named: name, withExtension: "json")
         var resolver = DictionaryResolver()
-        try resolver.loadRecords(from: url)
+        try resolver.loadRecords(from: url, mode: .multipleRecordsPerFile)
         if resolve {
             resolver.resolve()
         }
@@ -79,6 +79,23 @@ final class DictionaryResolverTests: XCTestCase {
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
         XCTAssertEqual(r2["unmerged"] as? [String], ["foo", "bar"])
+    }
+
+    func testLoadingFolderSingleRecord() throws {
+        let url = testURL(named: "SimpleTest", withExtension: "json")
+        let folder = url.deletingLastPathComponent()
+        var resolver = DictionaryResolver()
+        try resolver.loadRecords(from: folder, mode: .oneRecordPerFile)
+        XCTAssertEqual(resolver.records.count, 6)
+    }
+
+    func testLoadingFolderMultipleRecords() throws {
+        let url = testURL(named: "SimpleTest", withExtension: "json")
+        let folder = url.deletingLastPathComponent()
+        var resolver = DictionaryResolver()
+        try resolver.loadRecords(from: folder, mode: .multipleRecordsPerFile)
+        // multiple versions of "r1", "r2" and "r3" will overwrite each other, so the count will end up just being 3
+        XCTAssertEqual(resolver.records.count, 3)
     }
 
 }

@@ -59,22 +59,21 @@ public struct DictionaryResolver {
         }
     }
 
-    /// Add a record to the index from a file.
-    public mutating func loadRecord(from url: URL) throws {
-        let data = try Data(contentsOf: url)
-        if let record = try JSONSerialization.jsonObject(with: data) as? DictionaryResolver.Record {
-            add(record, withID: url.deletingPathExtension().lastPathComponent)
-        }
+    public enum LoadMode {
+        case oneRecordPerFile
+        case multipleRecordsPerFile
     }
-
+    
     /// Add some records to the index from a file.
-    public mutating func loadRecords(from url: URL) throws {
-        let data = try Data(contentsOf: url)
-        if let records = try JSONSerialization.jsonObject(with: data) as? DictionaryResolver.Index {
-            add(records)
+    public mutating func loadRecords(from url: URL, mode: LoadMode = .oneRecordPerFile, idPrefix: String = "") throws {
+        if url.hasDirectoryPath {
+            try loadRecords(fromFolder: url, mode: mode, idPrefix: idPrefix)
+        } else {
+            try loadRecords(fromFile: url, mode: mode, idPrefix: idPrefix)
         }
     }
     
+
     /// Resolve all unresolved records.
     public mutating func resolve() {
         // use a simple merge function if we can, as it's faster
@@ -192,4 +191,27 @@ private extension DictionaryResolver {
         }
     }
 
+    mutating func loadRecords(fromFile url: URL, mode: LoadMode, idPrefix: String = "") throws {
+        let data = try Data(contentsOf: url)
+        if let decoded = try JSONSerialization.jsonObject(with: data) as? [String:Any] {
+            switch mode {
+                case .oneRecordPerFile:
+                    let name = url.deletingPathExtension().lastPathComponent
+                    add([name: decoded])
+                    
+                case .multipleRecordsPerFile:
+                    if let records = decoded as? DictionaryResolver.Index {
+                        add(records)
+                    }
+            }
+        }
+    }
+    
+    mutating func loadRecords(fromFolder url: URL, mode: LoadMode, idPrefix: String = "") throws {
+        let name = url.deletingPathExtension().lastPathComponent
+        let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.nameKey], options: [.skipsSubdirectoryDescendants])
+        for item in contents {
+            try loadRecords(from: item, mode: mode, idPrefix: "\(idPrefix)\(name).")
+        }
+    }
 }
