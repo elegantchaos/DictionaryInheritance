@@ -5,6 +5,7 @@
 
 import CollectionExtensions
 import Foundation
+import JSONExtensions
 
 public struct DictionaryResolver {
     public typealias Record = [String:Any]
@@ -92,6 +93,11 @@ public struct DictionaryResolver {
     /// If there is no resolved record, returns the unresolved if it exists.
     public func record(withID id: String) -> Record? {
         resolved[id] ?? records[id]
+    }
+    
+    /// Returns all of the resolved records.
+    public var resolvedRecords: Index {
+        return resolved
     }
     
     /// Remove all records.
@@ -192,8 +198,7 @@ private extension DictionaryResolver {
     }
 
     mutating func loadRecords(fromFile url: URL, mode: LoadMode, idPrefix: String = "") throws {
-        let data = try Data(contentsOf: url)
-        if let decoded = try JSONSerialization.jsonObject(with: data) as? [String:Any] {
+        if let decoded = try JSONSerialization.jsonObject(from: url) as? [String:Any] {
             switch mode {
                 case .oneRecordPerFile:
                     let name = url.deletingPathExtension().lastPathComponent

@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "JSONExtensions",
+        "repositoryURL": "https://github.com/elegantchaos/JSONExtensions.git",
+        "state": {
+          "branch": null,
+          "revision": "99a431cb07c9c7ac84704ad1a677bb33f592e158",
+          "version": "1.0.3"
+        }
+      },
+      {
         "package": "Matchable",
         "repositoryURL": "https://github.com/elegantchaos/Matchable.git",
         "state": {
