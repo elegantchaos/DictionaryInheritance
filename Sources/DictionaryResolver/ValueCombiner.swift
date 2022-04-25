@@ -23,24 +23,44 @@ public struct Combiners {
         combiners.append(combiner)
     }
     
-    public func combine(_ existing: Any, _ new: Any) -> Any {
+    public func combine<T>(_ existing: T, _ new: T) -> T {
         for combiner in combiners {
             switch combiner(existing, new) {
-                case .combined(let result): return result
+                case .combined(let result): return result as! T
                 case .notCombined: break
             }
         }
-        
+
         return existing
     }
     
-    /// Standard combiner which merges two lists of strings together.
-    /// It only runs if both the current and inherited values for the key are of type `Array<String>`.
-    public static func combineStringLists(_ existing: Any, _ inherited: Any) -> Combiners.CombineResult {
-        guard let existing = existing as? [String], let inherited = inherited as? [String] else {
+    /// Standard combiner which merges two lists together.
+    /// It only runs if both lists are of the same type.
+    public static func combineLists(_ existing: Any, _ inherited: Any) -> Combiners.CombineResult {
+        guard let existing = existing as? Combinable, let inherited = inherited as? Combinable else {
             return .notCombined
         }
-        
-        return .combined(inherited + existing)
+
+        return .combined(existing.combine(with: inherited))
     }
+
+}
+
+public protocol Combinable {
+    func combine(with other: Any) -> Any
+}
+
+extension Array: Combinable {
+    public func combine(with other: Any) -> Any {
+        guard type(of: other) == type(of: self) else { return self }
+        return (other as! Self) + self
+    }
+}
+
+extension NSArray: Combinable {
+    public func combine(with other: Any) -> Any {
+        guard type(of: other) == type(of: self) else { return self }
+        return (other as! [Any]) + (self as! [Any])
+    }
+
 }
