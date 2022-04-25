@@ -11,7 +11,7 @@ public struct Combiners {
         case combined(Any)
     }
     
-    public typealias Combiner = (Any, Any) -> CombineResult
+    public typealias Combiner = (Any, Any, Combiners) -> CombineResult
 
     var combiners: [Combiner]
 
@@ -25,7 +25,7 @@ public struct Combiners {
     
     public func combine<T>(_ existing: T, _ new: T) -> T {
         for combiner in combiners {
-            switch combiner(existing, new) {
+            switch combiner(existing, new, self) {
                 case .combined(let result): return result as! T
                 case .notCombined: break
             }
@@ -36,31 +36,11 @@ public struct Combiners {
     
     /// Standard combiner which merges two lists together.
     /// It only runs if both lists are of the same type.
-    public static func combineLists(_ existing: Any, _ inherited: Any) -> Combiners.CombineResult {
+    public static func combineCombinable(_ existing: Any, _ inherited: Any, combiners: Combiners) -> Combiners.CombineResult {
         guard let existing = existing as? Combinable, let inherited = inherited as? Combinable else {
             return .notCombined
         }
 
-        return .combined(existing.combine(with: inherited))
+        return .combined(existing.combine(with: inherited, combiners: combiners))
     }
-
-}
-
-public protocol Combinable {
-    func combine(with other: Any) -> Any
-}
-
-extension Array: Combinable {
-    public func combine(with other: Any) -> Any {
-        guard type(of: other) == type(of: self) else { return self }
-        return (other as! Self) + self
-    }
-}
-
-extension NSArray: Combinable {
-    public func combine(with other: Any) -> Any {
-        guard type(of: other) == type(of: self) else { return self }
-        return (other as! [Any]) + (self as! [Any])
-    }
-
 }
