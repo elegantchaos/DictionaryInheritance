@@ -6,18 +6,18 @@
 import Foundation
 
 public protocol Combinable {
-    func combine(with other: Any, combiners: Combiners) -> Any
+    func combine(with other: Any, combiners: Combiner) -> Any
 }
 
 extension Array: Combinable {
-    public func combine(with other: Any, combiners: Combiners) -> Any {
+    public func combine(with other: Any, combiners: Combiner) -> Any {
         guard type(of: other) == type(of: self) else { return self }
         return (other as! Self) + self
     }
 }
 
 extension NSArray: Combinable {
-    public func combine(with other: Any, combiners: Combiners) -> Any {
+    public func combine(with other: Any, combiners: Combiner) -> Any {
         guard type(of: other) == type(of: self) else { return self }
         return (other as! [Any]) + (self as! [Any])
     }
@@ -25,7 +25,7 @@ extension NSArray: Combinable {
 }
 
 extension Dictionary: Combinable {
-    public func combine(with other: Any, combiners: Combiners) -> Any {
+    public func combine(with other: Any, combiners: Combiner) -> Any {
         guard type(of: other) == type(of: self) else { return self }
         return self.merging(other as! Self, uniquingKeysWith: { existing, new in
             combiners.combine(existing, new)

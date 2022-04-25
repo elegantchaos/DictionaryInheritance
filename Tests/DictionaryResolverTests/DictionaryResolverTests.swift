@@ -63,7 +63,7 @@ final class DictionaryResolverTests: XCTestCase {
 
     func testMergingLists() throws {
         var index = try testResolver(named: "ListMergeTest", resolve: false)
-        index.addCombiner(Combiners.combineCombinable)
+        index.addCombiner(Combiner.combineCombinable)
         index.resolve()
         
         let r2 = index.record(withID: "r2")!

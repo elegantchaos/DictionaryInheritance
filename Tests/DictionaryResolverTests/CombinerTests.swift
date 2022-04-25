@@ -10,30 +10,30 @@ import XCTestExtensions
 
 final class CombinerTests: XCTestCase {
     func testDefaultBehaviour() {
-        let combiners = Combiners()
+        let combiners = Combiner()
         XCTAssertEqual(combiners.combine(1, 2), 1)
     }
     
     func testDefaultLists() {
-        let combiners = Combiners()
+        let combiners = Combiner()
         XCTAssertEqual(combiners.combine(["foo"], ["bar"]), ["foo"])
     }
 
     func testCombinedLists() {
-        var combiners = Combiners()
-        combiners.append(Combiners.combineCombinable)
+        var combiners = Combiner()
+        combiners.append(Combiner.combineCombinable)
         XCTAssertEqual(combiners.combine(["foo"], ["bar"]), ["bar", "foo"])
     }
 
     func testCombinedDictionaries() {
-        var combiners = Combiners()
-        combiners.append(Combiners.combineCombinable)
+        var combiners = Combiner()
+        combiners.append(Combiner.combineCombinable)
         XCTAssertEqual(combiners.combine(["foo" : "bar"], ["bar" : "foo"]), ["foo": "bar", "bar": "foo"])
     }
 
     func testCombinedDeepDictionaries() {
-        var combiners = Combiners()
-        combiners.append(Combiners.combineCombinable)
+        var combiners = Combiner()
+        combiners.append(Combiner.combineCombinable)
         let d1: [String:Any] = [
             "name": "d1",
             "d1": true,

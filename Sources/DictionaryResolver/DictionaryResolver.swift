@@ -22,13 +22,13 @@ public struct DictionaryResolver {
     var resolved: Index
     
     /// Custom combining functions, stored by key.
-    var combiners: Combiners
+    var combiners: Combiner
 
     /// Create with an existing set of records.
     public init(_ records: Index = [:], inheritanceKey: String = "inherits", resolvingKey: String = "«resolving»") {
         self.records = records
         self.resolved = [:]
-        self.combiners = Combiners()
+        self.combiners = Combiner()
         self.inheritanceKey = inheritanceKey
         self.resolvingKey = resolvingKey
     }
@@ -44,7 +44,7 @@ public struct DictionaryResolver {
     }
     
     /// Register a custom function to combine values.
-    public mutating func addCombiner(_ combiner: @escaping Combiners.Combiner) {
+    public mutating func addCombiner(_ combiner: @escaping Combiner.Processor) {
         combiners.append(combiner)
     }
 

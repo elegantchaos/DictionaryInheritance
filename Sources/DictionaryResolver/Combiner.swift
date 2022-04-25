@@ -5,26 +5,26 @@
 
 import Foundation
 
-public struct Combiners {
-    public enum CombineResult {
+public struct Combiner {
+    public enum Result {
         case notCombined
         case combined(Any)
     }
     
-    public typealias Combiner = (Any, Any, Combiners) -> CombineResult
+    public typealias Processor = (Any, Any, Combiner) -> Result
 
-    var combiners: [Combiner]
+    var processors: [Processor]
 
     public init() {
-        combiners = []
+        processors = []
     }
     
-    public mutating func append(_ combiner: @escaping Combiner) {
-        combiners.append(combiner)
+    public mutating func append(_ combiner: @escaping Processor) {
+        processors.append(combiner)
     }
     
     public func combine<T>(_ existing: T, _ new: T) -> T {
-        for combiner in combiners {
+        for combiner in processors {
             switch combiner(existing, new, self) {
                 case .combined(let result): return result as! T
                 case .notCombined: break
@@ -34,9 +34,8 @@ public struct Combiners {
         return existing
     }
     
-    /// Standard combiner which merges two lists together.
-    /// It only runs if both lists are of the same type.
-    public static func combineCombinable(_ existing: Any, _ inherited: Any, combiners: Combiners) -> Combiners.CombineResult {
+    /// Standard combiner which merges two combinble types together.
+    public static func combineCombinable(_ existing: Any, _ inherited: Any, combiners: Combiner) -> Combiner.Result {
         guard let existing = existing as? Combinable, let inherited = inherited as? Combinable else {
             return .notCombined
         }
