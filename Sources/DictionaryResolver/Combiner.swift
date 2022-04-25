@@ -35,11 +35,11 @@ public struct Combiner {
     }
     
     /// Standard combiner which merges two combinble types together.
-    public static func combineCombinable(_ existing: Any, _ inherited: Any, combiners: Combiner) -> Combiner.Result {
+    public static func combineCombinable(_ existing: Any, _ inherited: Any, combiner: Combiner) -> Combiner.Result {
         guard let existing = existing as? Combinable, let inherited = inherited as? Combinable else {
             return .notCombined
         }
 
-        return .combined(existing.combine(with: inherited, combiners: combiners))
+        return .combined(existing.combine(with: inherited, combiner: combiner))
     }
 }
