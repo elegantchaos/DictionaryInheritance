@@ -1,12 +1,10 @@
 {
     "r1": {
         "merged": ["foo"],
-        "unmerged": ["foo"]
     },
     
     "r2": {
         "inherits": ["r1"],
         "merged": ["bar"],
-        "unmerged": ["bar"]
     }
 }

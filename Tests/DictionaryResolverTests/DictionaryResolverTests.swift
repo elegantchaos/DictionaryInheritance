@@ -61,24 +61,13 @@ final class DictionaryResolverTests: XCTestCase {
         XCTAssertEqual(r2["foo"] as? String, "bar")
     }
 
-    func testMergingListsByKey() throws {
+    func testMergingLists() throws {
         var index = try testResolver(named: "ListMergeTest", resolve: false)
-        index.addCombinerForKeys(["merged"], DictionaryResolver.combineStringLists)
+        index.addCombiner(Combiners.combineStringLists)
         index.resolve()
         
         let r2 = index.record(withID: "r2")!
         XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
-        XCTAssertEqual(r2["unmerged"] as? [String], ["bar"])
-    }
-
-    func testMergingListsByType() throws {
-        var index = try testResolver(named: "ListMergeTest", resolve: false)
-        index.addCombiner(DictionaryResolver.combineStringLists)
-        index.resolve()
-        
-        let r2 = index.record(withID: "r2")!
-        XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
-        XCTAssertEqual(r2["unmerged"] as? [String], ["foo", "bar"])
     }
 
     func testLoadingFolderSingleRecord() throws {
