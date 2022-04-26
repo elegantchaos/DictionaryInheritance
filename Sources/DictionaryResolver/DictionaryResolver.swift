@@ -49,12 +49,14 @@ public struct DictionaryResolver {
     }
 
     public enum LoadMode {
-        case oneRecordPerFile
-        case multipleRecordsPerFile
+        case singleRecordPerFileSkipRootID          // Skip the root folder name when calculating the record id.
+        case singleRecordPerFileWithNestedID        // Append the folder name to the record id.
+        case singleRecordPerFileNoNestedID          // Never the folder name to the record id.
+        case multipleRecordsPerFile                 // Each file contains a dictionary with multiple records. The first level of keys are the record ids.
     }
     
     /// Add some records to the index from a file.
-    public mutating func loadRecords(from url: URL, mode: LoadMode = .oneRecordPerFile, idPrefix: String = "") throws {
+    public mutating func loadRecords(from url: URL, mode: LoadMode = .singleRecordPerFileSkipRootID, idPrefix: String = "") throws {
         if url.hasDirectoryPath {
             try loadRecords(fromFolder: url, mode: mode, idPrefix: idPrefix)
         } else {
@@ -146,10 +148,15 @@ private extension DictionaryResolver {
     mutating func loadRecords(fromFile url: URL, mode: LoadMode, idPrefix: String = "") throws {
         if let decoded = try JSONSerialization.jsonObject(from: url) as? [String:Any] {
             switch mode {
-                case .oneRecordPerFile:
+                case .singleRecordPerFileSkipRootID, .singleRecordPerFileNoNestedID:
+                    let id = url.deletingPathExtension().lastPathComponent
+                    add([id: decoded])
+
+                case .singleRecordPerFileWithNestedID:
                     let name = url.deletingPathExtension().lastPathComponent
-                    add([name: decoded])
-                    
+                    let id = "\(idPrefix)\(name)"
+                    add([id: decoded])
+
                 case .multipleRecordsPerFile:
                     if let records = decoded as? DictionaryResolver.Index {
                         add(records)
@@ -161,8 +168,26 @@ private extension DictionaryResolver {
     mutating func loadRecords(fromFolder url: URL, mode: LoadMode, idPrefix: String = "") throws {
         let name = url.deletingPathExtension().lastPathComponent
         let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.nameKey], options: [.skipsSubdirectoryDescendants])
+        
+        let recursiveMode: LoadMode
+        let recursivePrefix: String
+        
+        switch mode {
+            case .singleRecordPerFileSkipRootID:
+                recursivePrefix = idPrefix
+                recursiveMode = .singleRecordPerFileWithNestedID
+
+            case .singleRecordPerFileNoNestedID:
+                recursivePrefix = idPrefix
+                recursiveMode = mode
+
+            default:
+                recursivePrefix = "\(idPrefix)\(name)."
+                recursiveMode = mode
+        }
+        
         for item in contents {
-            try loadRecords(from: item, mode: mode, idPrefix: "\(idPrefix)\(name).")
+            try loadRecords(from: item, mode: recursiveMode, idPrefix: recursivePrefix)
         }
     }
 }

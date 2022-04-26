@@ -40,7 +40,8 @@ let package = Package(
             ],
             
             resources: [
-                .copy("Resources")
+                .copy("Resources/Structured"),
+                .copy("Resources/Individual")
             ]
         ),
     ]

@@ -10,7 +10,7 @@ import XCTestExtensions
 
 final class DictionaryResolverTests: XCTestCase {
     func testResolver(named name: String, resolve: Bool = true) throws -> DictionaryResolver {
-        let url = testURL(named: name, withExtension: "json")
+        let url = Bundle.module.url(forResource: name, withExtension: "json", subdirectory: "Individual")!
         var resolver = DictionaryResolver()
         try resolver.loadRecords(from: url, mode: .multipleRecordsPerFile)
         if resolve {
@@ -71,15 +71,15 @@ final class DictionaryResolverTests: XCTestCase {
     }
 
     func testLoadingFolderSingleRecord() throws {
-        let url = testURL(named: "SimpleTest", withExtension: "json")
+        let url = Bundle.module.url(forResource: "SimpleTest", withExtension: "json", subdirectory: "Individual")!
         let folder = url.deletingLastPathComponent()
         var resolver = DictionaryResolver()
-        try resolver.loadRecords(from: folder, mode: .oneRecordPerFile)
+        try resolver.loadRecords(from: folder, mode: .singleRecordPerFileSkipRootID)
         XCTAssertEqual(resolver.records.count, 6)
     }
 
     func testLoadingFolderMultipleRecords() throws {
-        let url = testURL(named: "SimpleTest", withExtension: "json")
+        let url = Bundle.module.url(forResource: "SimpleTest", withExtension: "json", subdirectory: "Individual")!
         let folder = url.deletingLastPathComponent()
         var resolver = DictionaryResolver()
         try resolver.loadRecords(from: folder, mode: .multipleRecordsPerFile)
