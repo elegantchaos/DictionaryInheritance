@@ -1,0 +1,14 @@
+{
+    "r1": {
+        "merged": ["foo"],
+    },
+    
+    "r2": {
+        "merged": ["bar"],
+    },
+    
+    "r3": {
+        "merged": ["wibble"],
+        "inherits": ["r1", "r2"],
+    }
+}

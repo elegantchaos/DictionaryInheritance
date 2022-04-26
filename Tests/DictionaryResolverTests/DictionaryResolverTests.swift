@@ -70,12 +70,21 @@ final class DictionaryResolverTests: XCTestCase {
         XCTAssertEqual(r2["merged"] as? [String], ["foo", "bar"])
     }
 
+    func testMergingListsWithMultipleInheritance() throws {
+        var index = try testResolver(named: "ListMergeWithInheritanceTest", resolve: false)
+        index.addCombiner(Combiner.combineCombinable)
+        index.resolve()
+        
+        let r3 = index.record(withID: "r3")!
+        XCTAssertEqual(r3["merged"] as? [String], ["bar", "foo", "wibble"])
+    }
+
     func testLoadingFolderSingleRecord() throws {
         let url = Bundle.module.url(forResource: "SimpleTest", withExtension: "json", subdirectory: "Individual")!
         let folder = url.deletingLastPathComponent()
         var resolver = DictionaryResolver()
         try resolver.loadRecords(from: folder, mode: .singleRecordPerFileSkipRootID)
-        XCTAssertEqual(resolver.records.count, 6)
+        XCTAssertEqual(resolver.records.count, 7)
     }
 
     func testLoadingFolderMultipleRecords() throws {

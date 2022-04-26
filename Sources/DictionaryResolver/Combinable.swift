@@ -11,15 +11,19 @@ public protocol Combinable {
 
 extension Array: Combinable {
     public func combine(with other: Any, combiner: Combiner) -> Any {
-        guard type(of: other) == type(of: self) else { return self }
-        return (other as! Self) + self
+        guard let other = other as? Self else { return self }
+
+        let combined = other + self
+        return combined
     }
 }
 
 extension NSArray: Combinable {
     public func combine(with other: Any, combiner: Combiner) -> Any {
-        guard type(of: other) == type(of: self) else { return self }
-        return (other as! [Any]) + (self as! [Any])
+        guard let existing = self as? [Any], let other = other as? [Any] else { return self }
+
+        let combined = other + existing
+        return combined
     }
     
 }
