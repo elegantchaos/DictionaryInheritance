@@ -18,6 +18,9 @@ public struct DictionaryResolver {
     /// Unprocessed records.
     var records: Index
     
+    /// Source mapping for records.
+    var sources: [String:URL]
+
     /// Resolved records.
     var resolved: Index
     
@@ -25,22 +28,29 @@ public struct DictionaryResolver {
     var combiners: Combiner
 
     /// Create with an existing set of records.
-    public init(_ records: Index = [:], inheritanceKey: String = "inherits", resolvingKey: String = "«resolving»") {
+    public init(_ records: Index = [:], sources: [String:URL] = [:], inheritanceKey: String = "inherits", resolvingKey: String = "«resolving»") {
         self.records = records
         self.resolved = [:]
+        self.sources = sources
         self.combiners = Combiner()
         self.inheritanceKey = inheritanceKey
         self.resolvingKey = resolvingKey
     }
     
     /// Add a record to the index.
-    public mutating func add(_ record: Record, withID id: String) {
+    public mutating func add(_ record: Record, withID id: String, source: URL? = nil) {
         records[id] = record
+        sources[id] = source
     }
     
     /// Add some records to the index.
-    public mutating func add(_ newRecords: Index) {
+    public mutating func add(_ newRecords: Index, source: URL? = nil) {
         records.mergeReplacingDuplicates(newRecords)
+        if let source = source {
+            for id in newRecords.keys {
+                sources[id] = source
+            }
+        }
     }
     
     /// Register a custom function to combine values.
@@ -150,16 +160,16 @@ private extension DictionaryResolver {
             switch mode {
                 case .singleRecordPerFileSkipRootID, .singleRecordPerFileNoNestedID:
                     let id = url.deletingPathExtension().lastPathComponent
-                    add([id: decoded])
+                    add(decoded, withID: id, source: url)
 
                 case .singleRecordPerFileWithNestedID:
                     let name = url.deletingPathExtension().lastPathComponent
                     let id = "\(idPrefix)\(name)"
-                    add([id: decoded])
+                    add(decoded, withID: id, source: url)
 
                 case .multipleRecordsPerFile:
                     if let records = decoded as? DictionaryResolver.Index {
-                        add(records)
+                        add(records, source: url)
                     }
             }
         }
