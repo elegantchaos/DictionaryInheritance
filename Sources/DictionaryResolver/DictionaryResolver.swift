@@ -177,7 +177,7 @@ private extension DictionaryResolver {
     
     mutating func loadRecords(fromFolder url: URL, mode: LoadMode, idPrefix: String = "") throws {
         let name = url.deletingPathExtension().lastPathComponent
-        let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.nameKey], options: [.skipsSubdirectoryDescendants])
+        let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.nameKey], options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
         
         let recursiveMode: LoadMode
         let recursivePrefix: String
